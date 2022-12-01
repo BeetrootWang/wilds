@@ -167,7 +167,7 @@ def main():
 
     config = parser.parse_args()
     config = populate_defaults(config)
-
+    print('starting')
     # For the GlobalWheat detection dataset,
     # we need to change the multiprocessing strategy or there will be
     # too many open file descriptors.
@@ -175,18 +175,26 @@ def main():
         torch.multiprocessing.set_sharing_strategy('file_system')
 
     # Set device
-    if torch.cuda.is_available():
-        device_count = torch.cuda.device_count()
-        if len(config.device) > device_count:
-            raise ValueError(f"Specified {len(config.device)} devices, but only {device_count} devices found.")
+    # if torch.cuda.is_available():
+    #     device_count = torch.cuda.device_count()
+    #     if len(config.device) > device_count:
+    #         raise ValueError(f"Specified {len(config.device)} devices, but only {device_count} devices found.")
+    #
+    #     config.use_data_parallel = len(config.device) > 1
+    #     device_str = ",".join(map(str, config.device))
+    #     os.environ["CUDA_VISIBLE_DEVICES"] = device_str
+    #     config.device = torch.device("cuda")
+    # else:
+    #     config.use_data_parallel = False
+    #     config.device = torch.device("cpu")
+    device_count = torch.cuda.device_count()
+    if len(config.device) > device_count:
+        raise ValueError(f"Specified {len(config.device)} devices, but only {device_count} devices found.")
 
-        config.use_data_parallel = len(config.device) > 1
-        device_str = ",".join(map(str, config.device))
-        os.environ["CUDA_VISIBLE_DEVICES"] = device_str
-        config.device = torch.device("cuda")
-    else:
-        config.use_data_parallel = False
-        config.device = torch.device("cpu")
+    config.use_data_parallel = len(config.device) > 1
+    device_str = ",".join(map(str, config.device))
+    os.environ["CUDA_VISIBLE_DEVICES"] = device_str
+    config.device = torch.device("cuda")
 
     # Initialize logs
     if os.path.exists(config.log_dir) and config.resume:
